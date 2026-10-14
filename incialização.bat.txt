@@ -1,0 +1,769 @@
+@echo off
+cd/d"%~dp0backend"
+node server.js
+pause   
+
+
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Cadastro de Usuários</title>
+
+  <!-- Bootstrap 5 -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <!-- Folha de estilos -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-body-tertiary">
+
+  <main class="container py-5">
+
+    <header class="mb-4">
+      <h1 class="fw-bold">Cadastro de Usuários</h1>
+      <p class="text-secondary">
+        Cadastre, consulte e mantenha os dados salvos no banco de dados.
+      </p>
+    </header>
+
+    <!-- Mensagens de sucesso e erro -->
+    <div
+      id="mensagem"
+      class="alert d-none"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+    <div class="row g-4">
+
+      <!-- COLUNA ESQUERDA: FORMULÁRIO -->
+      <section class="col-lg-4" aria-labelledby="titulo-formulario">
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+
+            <h2 id="titulo-formulario" class="h5 mb-4">
+              Novo Usuário
+            </h2>
+
+            <form id="formulario">
+
+              <div class="mb-3">
+                <label for="nome" class="form-label">
+                  Nome Completo
+                </label>
+                
+<!-- Campo Codinome -->
+<div class="mb-3">
+  <label for="codinome" class="form-label">
+    Codinome
+  </label>
+
+  <input
+    id="codinome"
+    name="codinome"
+    class="form-control"
+    type="text"
+    placeholder="Ex: Fênix"
+    required
+    minlength="2"
+    maxlength="50"
+  >
+</div>
+
+<!-- Campo Nível -->
+<div class="mb-3">
+  <label for="nivel" class="form-label">
+    Nível
+  </label>
+
+  <select
+    id="nivel"
+    name="nivel"
+    class="form-select"
+    required
+  >
+    <option value="">Selecione um nível</option>
+    <option value="Iniciante">Iniciante</option>
+    <option value="Especialista">Especialista</option>
+    <option value="Líder">Líder</option>
+  </select>
+</div>
+
+                <input
+                  id="nome"
+                  name="nome"
+                  class="form-control"
+                  type="text"
+                  placeholder="Ex: Maria Silva"
+                  required
+                  minlength="2"
+                  maxlength="100"
+                >
+              </div>
+
+              <div class="mb-3">
+                <label for="email" class="form-label">
+                  E-mail
+                </label>
+
+                <input
+                  id="email"
+                  name="email"
+                  class="form-control"
+                  type="email"
+                  placeholder="Ex: maria@email.com"
+                  required
+                  maxlength="150"
+                >
+              </div>
+
+              <div class="mb-4">
+                <label for="telefone" class="form-label">
+                  Telefone
+                  <span class="text-secondary">(opcional)</span>
+                </label>
+
+                <input
+                  id="telefone"
+                  name="telefone"
+                  class="form-control"
+                  type="tel"
+                  placeholder="(11) 99999-9999"
+                  maxlength="30"
+                >
+              </div>
+
+              <button
+                id="salvar"
+                class="btn btn-primary w-100"
+                type="submit"
+              >
+                Cadastrar
+              </button>
+
+              <!-- Botão fora da tabela -->
+              <button
+                id="cancelar-edicao"
+                class="btn btn-secondary w-100 mt-2 d-none"
+                type="button"
+              >
+                Cancelar edição
+              </button>
+
+            </form>
+
+          </div>
+        </div>
+
+      </section>
+
+      <!-- COLUNA DIREITA: TABELA -->
+      <section class="col-lg-8" aria-labelledby="titulo-tabela">
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+
+            <div
+              class="d-flex justify-content-between align-items-center mb-3"
+            >
+              <h2 id="titulo-tabela" class="h5 mb-0">
+                Usuários Cadastrados
+              </h2>
+
+              <span id="total-usuarios" class="badge bg-secondary">
+                0 usuários
+              </span>
+            </div>
+
+            <div class="table-responsive">
+
+              <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+                  <tr>
+  <th scope="col">NOME</th>
+  <th scope="col">CODINOME</th>
+  <th scope="col">E-MAIL</th>
+  <th scope="col">TELEFONE</th>
+  <th scope="col">NÍVEL</th>
+  <th scope="col">AÇÕES</th>
+</tr>
+                </thead>
+
+                <tbody id="tabela-usuarios">
+                  <tr>
+                    <td
+                      colspan="6"
+                      class="text-center text-secondary py-4"
+                    >
+                      Carregando usuários...
+                    </td>
+                  </tr>
+                </tbody>
+
+              </table>
+
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    // ENDEREÇO DA API
+    const API_URL = "http://localhost:3000/api/usuarios";
+
+    // ELEMENTOS DO HTML
+    const formulario = document.getElementById("formulario");
+    const inputNome = document.getElementById("nome");
+    const inputEmail = document.getElementById("email");
+    const inputTelefone = document.getElementById("telefone");
+
+    const btnSalvar = document.getElementById("salvar");
+    const btnCancelar = document.getElementById("cancelar-edicao");
+
+    const inputCodinome = document.getElementById("codinome");
+const inputNivel = document.getElementById("nivel");
+
+    const divMensagem = document.getElementById("mensagem");
+    const tabelaUsuarios = document.getElementById("tabela-usuarios");
+    const badgeTotal = document.getElementById("total-usuarios");
+
+    // GUARDA O ID DO USUÁRIO QUE ESTÁ SENDO EDITADO
+    // null significa que estamos cadastrando um novo usuário.
+    let usuarioEditandoId = null;
+
+    // EXIBIR MENSAGEM NA TELA
+    function exibirMensagem(texto, tipo = "success") {
+      divMensagem.textContent = texto;
+      divMensagem.className = `alert alert-${tipo}`;
+      divMensagem.classList.remove("d-none");
+    }
+
+    // ESCONDER MENSAGEM
+    function limparMensagem() {
+      divMensagem.classList.add("d-none");
+      divMensagem.textContent = "";
+    }
+
+    // EVITAR QUE DADOS DOS USUÁRIOS SEJAM INTERPRETADOS COMO HTML
+    function sanitizarHtml(texto) {
+      const div = document.createElement("div");
+      div.textContent = texto ?? "";
+      return div.innerHTML;
+    }
+
+    // LER E VALIDAR A RESPOSTA DA API
+    async function lerResposta(resposta) {
+      const texto = await resposta.text();
+
+      let dados = {};
+
+      if (texto.trim() !== "") {
+        try {
+          dados = JSON.parse(texto);
+        } catch {
+          throw new Error(
+            "O servidor não retornou JSON válido."
+          );
+        }
+      }
+
+      if (!resposta.ok) {
+        throw new Error(
+          dados.erro || `Erro do servidor: ${resposta.status}`
+        );
+      }
+
+      return dados;
+    }
+
+    // 1. CARREGAR USUÁRIOS DO BANCO DE DADOS
+    async function carregarUsuarios() {
+      try {
+        const resposta = await fetch(API_URL);
+        const usuarios = await lerResposta(resposta);
+
+        if (!Array.isArray(usuarios)) {
+          throw new Error(
+            "A API não retornou uma lista válida de usuários."
+          );
+        }
+
+        renderizarTabela(usuarios);
+
+      } catch (erro) {
+        tabelaUsuarios.innerHTML = `
+          <tr>
+            <td colspan="6"
+                class="text-center text-danger py-4">
+              ${sanitizarHtml(erro.message)}
+            </td>
+          </tr>
+        `;
+
+        exibirMensagem(
+          "Não foi possível carregar os usuários. Verifique se o servidor está ligado.",
+          "danger"
+        );
+      }
+    }
+
+    // 2. MOSTRAR OS USUÁRIOS NA TABELA
+    function renderizarTabela(usuarios) {
+      badgeTotal.textContent =
+        `${usuarios.length} usuário${usuarios.length === 1 ? "" : "s"}`;
+
+      if (usuarios.length === 0) {
+        tabelaUsuarios.innerHTML = `
+          <tr>
+            <td colspan="6"
+                class="text-center text-secondary py-4">
+              Nenhum usuário cadastrado.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tabelaUsuarios.innerHTML = usuarios.map(usuario => `
+        <tr>
+          <td class="fw-medium">
+            ${sanitizarHtml(usuario.nome)}
+          </td>
+
+          <td>
+            ${sanitizarHtml(usuario.email)}
+          </td>
+
+          <td>
+            ${sanitizarHtml(usuario.telefone || "-")}
+          </td>
+
+          <td>
+            <div class="d-flex flex-wrap gap-2">
+
+              <button
+                type="button"
+                class="btn btn-warning btn-sm"
+                data-acao="editar"
+                data-id="${Number(usuario.id)}"
+              >
+                Editar
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                data-acao="excluir"
+                data-id="${Number(usuario.id)}"
+              >
+                Excluir
+              </button>
+
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    // 3. PREPARAR O FORMULÁRIO PARA EDIÇÃO
+    async function editarUsuario(id) {
+      try {
+        const resposta = await fetch(API_URL);
+        const usuarios = await lerResposta(resposta);
+
+        if (!Array.isArray(usuarios)) {
+          throw new Error("Lista de usuários inválida.");
+        }
+
+        const usuario = usuarios.find(
+          item => Number(item.id) === id
+        );
+
+        if (!usuario) {
+          throw new Error("Usuário não encontrado.");
+        }
+
+        inputNome.value = usuario.nome ?? "";
+        inputEmail.value = usuario.email ?? "";
+        inputTelefone.value = usuario.telefone ?? "";
+
+        usuarioEditandoId = id;
+
+        btnSalvar.textContent = "Salvar alterações";
+        btnCancelar.classList.remove("d-none");
+
+        document.getElementById("titulo-formulario").textContent =
+          "Editar Usuário";
+
+        inputNome.focus();
+
+        exibirMensagem(
+          "Altere os dados e clique em Salvar alterações.",
+          "info"
+        );
+
+      } catch (erro) {
+        exibirMensagem(erro.message, "danger");
+      }
+    }
+
+    // 4. CANCELAR A EDIÇÃO
+    function cancelarEdicao() {
+      usuarioEditandoId = null;
+
+      formulario.reset();
+
+      btnSalvar.textContent = "Cadastrar";
+      btnCancelar.classList.add("d-none");
+
+      document.getElementById("titulo-formulario").textContent =
+        "Novo Usuário";
+    }
+
+    // EVENTO DO BOTÃO CANCELAR
+    btnCancelar.addEventListener("click", () => {
+      cancelarEdicao();
+      limparMensagem();
+      inputNome.focus();
+    });
+
+    // 5. EXCLUIR USUÁRIO
+    async function excluirUsuario(id, botao) {
+      const confirmar = confirm(
+        "Tem certeza de que deseja excluir este usuário?"
+      );
+
+      if (!confirmar) return;
+
+      botao.disabled = true;
+
+      try {
+        const resposta = await fetch(`${API_URL}/${id}`, {
+          method: "DELETE"
+        });
+
+        await lerResposta(resposta);
+
+        if (usuarioEditandoId === id) {
+          cancelarEdicao();
+        }
+
+        exibirMensagem(
+          "Usuário excluído com sucesso!",
+          "success"
+        );
+
+        await carregarUsuarios();
+
+      } catch (erro) {
+        exibirMensagem(erro.message, "danger");
+        botao.disabled = false;
+      }
+    }
+
+    // 6. IDENTIFICAR OS BOTÕES EDITAR E EXCLUIR
+    tabelaUsuarios.addEventListener("click", async (evento) => {
+      const botao = evento.target.closest("button[data-acao]");
+
+      if (!botao) return;
+
+      const id = Number(botao.dataset.id);
+      const acao = botao.dataset.acao;
+
+      if (!Number.isSafeInteger(id) || id <= 0) {
+        exibirMensagem("ID de usuário inválido.", "danger");
+        return;
+      }
+
+      if (acao === "editar") {
+        await editarUsuario(id);
+      }
+
+      if (acao === "excluir") {
+        await excluirUsuario(id, botao);
+      }
+    });
+
+    // 7. CADASTRAR OU ATUALIZAR USUÁRIO
+    formulario.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+
+      if (!formulario.reportValidity()) {
+        return;
+      }
+
+      const estaEditando = usuarioEditandoId !== null;
+
+      const metodo = estaEditando ? "PUT" : "POST";
+
+      const url = estaEditando
+        ? `${API_URL}/${usuarioEditandoId}`
+        : API_URL;
+
+      const dadosUsuario = {
+        nome: inputNome.value.trim(),
+        email: inputEmail.value.trim(),
+        telefone: inputTelefone.value.trim()
+      };
+
+      // Impede cliques repetidos durante o envio.
+      btnSalvar.disabled = true;
+      btnCancelar.disabled = true;
+
+      btnSalvar.textContent = estaEditando
+        ? "Salvando alterações..."
+        : "Cadastrando...";
+
+      limparMensagem();
+
+      try {
+        const resposta = await fetch(url, {
+          method: metodo,
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify(dadosUsuario)
+        });
+
+        await lerResposta(resposta);
+
+        exibirMensagem(
+          estaEditando
+            ? "Usuário atualizado com sucesso!"
+            : "Usuário cadastrado com sucesso!",
+          "success"
+        );
+
+        cancelarEdicao();
+
+        await carregarUsuarios();
+
+        inputNome.focus();
+
+      } catch (erro) {
+        exibirMensagem(
+          erro.message || "Erro ao processar os dados.",
+          "danger"
+        );
+
+      } finally {
+        btnSalvar.disabled = false;
+        btnCancelar.disabled = false;
+
+        // Restaura o texto adequado sem perder o modo de edição.
+        btnSalvar.textContent =
+          usuarioEditandoId !== null
+            ? "Salvar alterações"
+            : "Cadastrar";
+      }
+    });
+
+    // 8. CARREGAR A LISTA QUANDO A PÁGINA ABRIR
+    carregarUsuarios();
+  </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+const http = require("node:http");
+const sqlite3 = require("sqlite3");
+const fs = require("node:fs");
+const path = require("node:path");
+
+const pastaData = path.join(__dirname, "data");
+if (!fs.existsSync(pastaData)) {
+  fs.mkdirSync(pastaData, { recursive: true });
+}
+
+const banco = new sqlite3.Database(path.join(pastaData, "banco_dados.db"));
+
+banco.run(`
+  CREATE TABLE IF NOT EXISTS tb_usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    telefone TEXT
+  )
+`);
+
+function enviarJson(res, status, dados) {
+  res.writeHead(status, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+  res.end(JSON.stringify(dados));
+}
+
+async function lerCorpo(req) {
+  const partes = [];
+  for await (const parte of req) partes.push(parte);
+  const texto = Buffer.concat(partes).toString("utf8");
+  return texto.trim() ? JSON.parse(texto) : {};
+}
+
+http.createServer(async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") return res.writeHead(204).end();
+
+  const url = new URL(req.url, "http://localhost:3000");
+  const pathname = url.pathname;
+
+  if (req.method === "GET" && pathname === "/") {
+    try {
+      const pagina = fs.readFileSync(path.join(__dirname, "../frontend/index.html"));
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      return res.end(pagina);
+    } catch {
+      res.writeHead(500).end("Erro ao carregar index.html");
+      return;
+    }
+  }
+
+  if (req.method === "GET" && pathname === "/style.css") {
+    try {
+      const estilo = fs.readFileSync(path.join(__dirname, "../frontend/style.css"));
+      res.writeHead(200, { "Content-Type": "text/css; charset=utf-8" });
+      return res.end(estilo);
+    } catch {
+      res.writeHead(404).end();
+      return;
+    }
+  }
+
+  if (req.method === "GET" && pathname === "/api/usuarios") {
+    banco.all(
+      "SELECT id, nome, email, telefone FROM tb_usuarios ORDER BY id DESC",
+      [],
+      (err, linhas) => {
+        if (err) return enviarJson(res, 500, { erro: err.message });
+        return enviarJson(res, 200, linhas);
+      }
+    );
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/api/usuarios") {
+    try {
+      const { nome, email, telefone = "" } = await lerCorpo(req);
+      if (typeof nome !== "string" || !nome.trim() ||
+          typeof email !== "string" || !email.trim()) {
+        return enviarJson(res, 400, { erro: "Nome e e-mail são obrigatórios." });
+      }
+
+      banco.run(
+        "INSERT INTO tb_usuarios(nome, email, telefone) VALUES (?, ?, ?)",
+        [nome.trim(), email.trim(), typeof telefone === "string" ? telefone.trim() : ""],
+        function (err) {
+          if (err) {
+            if (err.message.includes("UNIQUE")) {
+              return enviarJson(res, 409, { erro: "Este e-mail já está cadastrado." });
+            }
+            return enviarJson(res, 500, { erro: err.message });
+          }
+          return enviarJson(res, 201, {
+            mensagem: "Usuário cadastrado com sucesso!",
+            id: this.lastID
+          });
+        }
+      );
+    } catch {
+      return enviarJson(res, 400, { erro: "Dados enviados inválidos." });
+    }
+    return;
+  }
+
+  const rotaUsuario = pathname.match(/^\/api\/usuarios\/(\d+)$/);
+
+  // EDITAR um usuário
+  if (rotaUsuario && req.method === "PUT") {
+    const id = Number(rotaUsuario[1]);
+    try {
+      const { nome, email, telefone = "" } = await lerCorpo(req);
+
+      if (typeof nome !== "string" || !nome.trim() ||
+          typeof email !== "string" || !email.trim()) {
+        return enviarJson(res, 400, { erro: "Nome e e-mail são obrigatórios." });
+      }
+
+      banco.run(
+        "UPDATE tb_usuarios SET nome = ?, email = ?, telefone = ? WHERE id = ?",
+        [nome.trim(), email.trim(), typeof telefone === "string" ? telefone.trim() : "", id],
+        function (err) {
+          if (err) {
+            if (err.message.includes("UNIQUE")) {
+              return enviarJson(res, 409, { erro: "Este e-mail já está cadastrado em outro usuário." });
+            }
+            return enviarJson(res, 500, { erro: err.message });
+          }
+          if (this.changes === 0) {
+            return enviarJson(res, 404, { erro: "Usuário não encontrado." });
+          }
+          return enviarJson(res, 200, { mensagem: "Usuário atualizado com sucesso!" });
+        }
+      );
+    } catch {
+      return enviarJson(res, 400, { erro: "Dados enviados inválidos." });
+    }
+    return;
+  }
+
+  // EXCLUIR um usuário
+  if (rotaUsuario && req.method === "DELETE") {
+    const id = Number(rotaUsuario[1]);
+
+    banco.run("DELETE FROM tb_usuarios WHERE id = ?", [id], function (err) {
+      if (err) return enviarJson(res, 500, { erro: err.message });
+      if (this.changes === 0) {
+        return enviarJson(res, 404, { erro: "Usuário não encontrado." });
+      }
+      return enviarJson(res, 200, { mensagem: "Usuário excluído com sucesso!" });
+    });
+    return;
+  }
+
+  return enviarJson(res, 404, { erro: "Rota não encontrada." });
+}).listen(3000, () => {
+  console.log("Servidor rodando em http://localhost:3000");
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

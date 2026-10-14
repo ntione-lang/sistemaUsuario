@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Pizza - Pizzaria</title>
+</head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Pizza - Pizzaria</title>
+    <link rel="stylesheet" href="style.css">
+
+<body>
+
+    <header>
+        <h1>🍕 Cadastro de Novas Pizzas</h1>
+        <p>Preencha os dados abaixo para adicionar um novo sabor ao cardápio.</p>
+    </header>
+
+    <main>
+        <form action="/salvar-pizza" method="POST" enctype="multipart/form-data">
+            
+            <!-- Identificação do Produto -->
+            <fieldset>
+                <legend>Informações Principais</legend>
+
+                <div>
+                    <label for="nome">Nome da Pizza:</label>
+                    <input type="text" id="nome" name="nome" placeholder="Ex: Calabresa Especial" required>
+                </div>
+
+                <div>
+                    <label for="categoria">Categoria:</label>
+                    <select id="categoria" name="categoria" required>
+                        <option value="" disabled selected>Selecione uma categoria...</option>
+                        <option value="tradicional">Tradicional</option>
+                        <option value="especial">Especial / Gourmet</option>
+                        <option value="doce">Doce</option>
+                        <option value="vegetariana">Vegetariana / Vegana</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="descricao">Descrição / Ingredientes:</label>
+                    <textarea id="descricao" name="descricao" rows="4" placeholder="Ex: Molho de tomate artesanal, muçarela, calabresa fatiada, cebola roxa e orégano fresco." required></textarea>
+                </div>
+            </fieldset>
+
+            <!-- Preços por Tamanho -->
+            <fieldset>
+                <legend>Preços por Tamanho (R$)</legend>
+
+                <div>
+                    <label for="preco-p">Broto (P):</label>
+                    <input type="number" id="preco-p" name="preco_p" step="0.01" min="0" placeholder="0,00">
+                </div>
+
+                <div>
+                    <label for="preco-m">Média (M):</label>
+                    <input type="number" id="preco-m" name="preco_m" step="0.01" min="0" placeholder="0,00">
+                </div>
+
+                <div>
+                    <label for="preco-g">Grande (G):</label>
+                    <input type="number" id="preco-g" name="preco_g" step="0.01" min="0" placeholder="0,00" required>
+                </div>
+
+                <div>
+                    <label for="preco-gg">Família (GG):</label>
+                    <input type="number" id="preco-gg" name="preco_gg" step="0.01" min="0" placeholder="0,00">
+                </div>
+            </fieldset>
+
+            <!-- Foto e Detalhes Adicionais -->
+            <fieldset>
+                <legend>Mídia e Detalhes</legend>
+
+                <div>
+                    <label for="imagem">Foto da Pizza:</label>
+                    <input type="file" id="imagem" name="imagem" accept="image/*">
+                </div>
+
+                <fieldset>
+                    <legend>Características</legend>
+                    
+                    <label>
+                        <input type="checkbox" name="destaque" value="1">
+                        Destaque no cardápio
+                    </label><br>
+
+                    <label>
+                        <input type="checkbox" name="vegetariana" value="1">
+                        Vegetariana / Sem carne
+                    </label><br>
+
+                    <label>
+                        <input type="checkbox" name="picante" value="1">
+                        Contém pimenta / Picante
+                    </label>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Disponibilidade</legend>
+
+                    <label>
+                        <input type="radio" name="disponivel" value="sim" checked>
+                        Disponível para venda imediata
+                    </label><br>
+
+                    <label>
+                        <input type="radio" name="disponivel" value="nao">
+                        Indisponível temporariamente
+                    </label>
+                </fieldset>
+            </fieldset>
+
+            <!-- Ações -->
+            <div>
+                <button type="submit">Cadastrar Pizza</button>
+                <button type="reset">Limpar Campos</button>
+            </div>
+
+        </form>
+    </main>
+
+    <footer>
+        <p><small>&copy; Sistema de Gestão de Pizzaria</small></p>
+    </footer>
+    <script src="cadastro-pizza.js"></script>
+
+
+</body>
+</html>
